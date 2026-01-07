@@ -123,7 +123,7 @@ def format_msgs(el):
 # %% ../nbs/00_core.ipynb 46
 def create_msgs(doc_tuples, dname='', **kwargs):
     """Create solveit messages from list of (msg_type, content) tuples"""
-    for msg_type, ct in doc_tuples: add_msg(content=ct, msg_type=msg_type, placement='at_end' if dname else 'add_after', **kwargs)
+    for msg_type, ct in doc_tuples: add_msg(content=ct, msg_type=msg_type, placement='at_end' if dname else 'add_after', dname=dname, **kwargs)
 
 # %% ../nbs/00_core.ipynb 49
 def mk_dialog(url, dname=''):

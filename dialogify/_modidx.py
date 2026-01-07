@@ -19,4 +19,5 @@ d = { 'settings': { 'branch': 'main',
                                 'dialogify.core.html_to_md_children': ('core.html#html_to_md_children', 'dialogify/core.py'),
                                 'dialogify.core.merge_dt': ('core.html#merge_dt', 'dialogify/core.py'),
                                 'dialogify.core.mk_dialog': ('core.html#mk_dialog', 'dialogify/core.py'),
-                                'dialogify.core.preview_msgs': ('core.html#preview_msgs', 'dialogify/core.py')}}}
+                                'dialogify.core.preview_msgs': ('core.html#preview_msgs', 'dialogify/core.py'),
+                                'dialogify.core.table_to_md': ('core.html#table_to_md', 'dialogify/core.py')}}}

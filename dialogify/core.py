@@ -4,7 +4,8 @@
 
 # %% auto 0
 __all__ = ['get_main', 'clean_txt', 'get_title', 'get_sections', 'preview_msgs', 'html_to_md', 'html_to_md_children', 'has_cls',
-           'get_msg_type', 'collect_msgs', 'format_msg', 'merge_dt', 'format_msgs', 'create_msgs', 'mk_dialog']
+           'get_msg_type', 'collect_msgs', 'format_msg', 'table_to_md', 'merge_dt', 'format_msgs', 'create_msgs',
+           'mk_dialog']
 
 # %% ../nbs/00_core.ipynb 6
 from dialoghelper import *
@@ -80,6 +81,7 @@ def get_msg_type(el):
         case 'p': return ('note', el)
         case 'ul': return ('note', el)
         case 'dt': return ('dt', el)
+        case 'table': return ('note', el)
 
 # %% ../nbs/00_core.ipynb 34
 def collect_msgs(el):
@@ -104,9 +106,22 @@ def format_msg(msg_type, el):
             t = el.select_one('p.admonition-title')
             cts = '\n>\n> '.join([html_to_md(o) for o in t.find_next_siblings()])
             return r(f"> **{html_to_md(t)}**: {cts}")
+        case 'table': return r(table_to_md(el))
         case _: return r(html_to_md(el))
 
-# %% ../nbs/00_core.ipynb 37
+# %% ../nbs/00_core.ipynb 36
+def table_to_md(table):
+    "Convert HTML table to markdown format"
+    headers = [html_to_md(th) for th in table.select('thead th')]
+    rows = [[html_to_md(td) for td in tr.select('td')] for tr in table.select('tbody tr')]
+    
+    header_row = '| ' + ' | '.join(headers) + ' |'
+    sep_row = '| ' + ' | '.join(['---'] * len(headers)) + ' |'
+    data_rows = ['| ' + ' | '.join(row) + ' |' for row in rows]
+    
+    return '\n'.join([header_row, sep_row] + data_rows)
+
+# %% ../nbs/00_core.ipynb 38
 def merge_dt(msgs):
     "Merge consecutive 'dt' messages into single heading notes"
     res = []
@@ -115,17 +130,17 @@ def merge_dt(msgs):
         else: res.extend(grp)
     return res
 
-# %% ../nbs/00_core.ipynb 38
+# %% ../nbs/00_core.ipynb 39
 def format_msgs(el):
     "Convert HTML element to list of formatted (msg_type, markdown) tuples"
     return merge_dt([format_msg(t, e) for t, e in collect_msgs(el)])
 
-# %% ../nbs/00_core.ipynb 46
+# %% ../nbs/00_core.ipynb 47
 def create_msgs(doc_tuples, dname='', **kwargs):
     """Create solveit messages from list of (msg_type, content) tuples"""
     for msg_type, ct in doc_tuples: add_msg(content=ct, msg_type=msg_type, placement='at_end' if dname else 'add_after', dname=dname, **kwargs)
 
-# %% ../nbs/00_core.ipynb 49
+# %% ../nbs/00_core.ipynb 50
 def mk_dialog(url, dname=''):
     """Fetch Python docs URL and create a solveit dialog from it"""
     if dname and not (p := Path(f'{dname}.ipynb')).exists(): p.write_json({"cells":[],"metadata":{},"nbformat":4,"nbformat_minor":5})

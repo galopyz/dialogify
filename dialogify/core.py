@@ -46,7 +46,7 @@ def preview_msgs(msgs):
 
 # %% ../nbs/00_core.ipynb 26
 def html_to_md(el, in_link=False):
-    """Recursively convert HTML element to markdown string"""
+    "Recursively convert HTML element to markdown string"
     if isinstance(el, NavigableString): return str(el)
 
     children_md = html_to_md_children(el, in_link=el.name=='a')
@@ -60,13 +60,18 @@ def html_to_md(el, in_link=False):
         case _: return children_md
 
 # %% ../nbs/00_core.ipynb 27
-def html_to_md_children(el, in_link=False): return ''.join(html_to_md(child, in_link) for child in el.children)
+def html_to_md_children(el, in_link=False):
+    "Convert all children of an HTML element to markdown"
+    return ''.join(html_to_md(child, in_link) for child in el.children)
 
 # %% ../nbs/00_core.ipynb 31
-def has_cls(el, cls): return cls in ' '.join(el.get('class', []))
+def has_cls(el, cls):
+    "Check if element has a specific CSS class"
+    return cls in ' '.join(el.get('class', []))
 
 # %% ../nbs/00_core.ipynb 33
 def get_msg_type(el):
+    "Determine message type ('note', 'code', or 'dt') for an HTML element"
     match el.name:
         case 'h1': return ('note', el)
         case 'h2': return ('note', el)
@@ -78,6 +83,7 @@ def get_msg_type(el):
 
 # %% ../nbs/00_core.ipynb 34
 def collect_msgs(el):
+    "Recursively collect (msg_type, element) tuples from HTML tree"
     res = get_msg_type(el)
     if res: return [res]
     msgs = []
@@ -88,6 +94,7 @@ def collect_msgs(el):
 
 # %% ../nbs/00_core.ipynb 35
 def format_msg(msg_type, el):
+    "Convert (msg_type, element) tuple to (msg_type, markdown_string)"
     def r(ct): return (msg_type, ct)
     match el.name:
         case 'h1': return r(f"# {clean_txt(el)}")
@@ -101,6 +108,7 @@ def format_msg(msg_type, el):
 
 # %% ../nbs/00_core.ipynb 37
 def merge_dt(msgs):
+    "Merge consecutive 'dt' messages into single heading notes"
     res = []
     for t, grp in igroupby(msgs, first):
         if t == 'dt': res.append(('note', '\n'.join(o[1] for o in grp)))
@@ -108,14 +116,16 @@ def merge_dt(msgs):
     return res
 
 # %% ../nbs/00_core.ipynb 38
-def format_msgs(el): return merge_dt([format_msg(t, e) for t, e in collect_msgs(el)])
+def format_msgs(el):
+    "Convert HTML element to list of formatted (msg_type, markdown) tuples"
+    return merge_dt([format_msg(t, e) for t, e in collect_msgs(el)])
 
-# %% ../nbs/00_core.ipynb 47
+# %% ../nbs/00_core.ipynb 46
 def create_msgs(doc_tuples, dname='', **kwargs):
     """Create solveit messages from list of (msg_type, content) tuples"""
     for msg_type, ct in doc_tuples: add_msg(content=ct, msg_type=msg_type, placement='at_end' if dname else 'add_after', **kwargs)
 
-# %% ../nbs/00_core.ipynb 50
+# %% ../nbs/00_core.ipynb 49
 def mk_dialog(url, dname=''):
     """Fetch Python docs URL and create a solveit dialog from it"""
     if dname and not (p := Path(f'{dname}.ipynb')).exists(): p.write_json({"cells":[],"metadata":{},"nbformat":4,"nbformat_minor":5})
